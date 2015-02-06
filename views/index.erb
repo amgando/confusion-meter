@@ -1,0 +1,25 @@
+<html>
+<head>
+  <title>Confusion Meter</title>
+  <script type="text/javascript" src="/js/meter.js" defer></script>
+  <link rel="stylesheet" type="text/css" href="/css/meter.css">
+  <meta name="viewport" content="width=device-width, initial-scale=2">
+</head>
+<body>
+
+<div class="container">
+  <form action="/questions" method="post">
+    <input type="text" name="text" placeholder="enter question text" class="input">
+    <br>
+    <input type="submit" value="add question">
+  </form>
+
+  <% @questions.each do |q| %>
+    <div class="question">
+      <div class="button" id="<%= q.id %>"><%= q.text %></div>
+      <div class="frequency"><%= q.frequency %></div>
+    </div>
+  <% end %>
+</div>
+</body>
+</html>

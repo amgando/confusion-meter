@@ -1,24 +1,53 @@
 require 'active_record'
 
-DATABASE = "meter"
-
-# cleanup since we might run this file (application) several times while building
-`rm #{DATABASE}.db`
-
 # setup the database connection
 ActiveRecord::Base.establish_connection(
   :adapter => "sqlite3",
-  :database =>  "#{DATABASE}.db"
+  :database =>  "meter.db"
 )
 
-
-# design the table schema
-ActiveRecord::Migration.create_table :questions do |t|
-  t.string :text
-  t.integer :frequency
-
-  t.timestamps
+class Question < ActiveRecord::Base
+  validates_presence_of :text
 end
 
-# the placeholder in the line below just lets Active Record Migrator work without hanging
-ActiveRecord::Migrator.up 'placeholder'
+# ---
+
+require 'sinatra'
+
+enable :sessions
+
+
+get '/' do
+  redirect '/questions'
+end
+
+get '/questions' do
+  @questions = Question.all
+  erb :index
+end
+
+post '/questions' do
+  question = Question.new(text: params[:text])
+
+  if question.save
+    redirect '/questions'
+  else
+    session[:errors] = "question text is required"
+  end
+end
+
+get '/questions/:id' do
+  question = Question.find(params[:id])
+
+  if question
+    question.frequency += 1
+    question.save
+
+    {question: question.id, frequency: question.frequency}.to_json
+  else
+
+    {errors: "question id is invalid"}.to_json
+  end
+
+end
+
